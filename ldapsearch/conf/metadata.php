@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Metadata for configuration manager plugin
  * Additions for the ldapsearch plugin
