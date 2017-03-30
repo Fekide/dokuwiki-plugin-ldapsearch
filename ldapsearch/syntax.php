@@ -113,21 +113,49 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin {
 		//print_r($this->ldapsearch_conf);
 	}
 
+	function getTable($ldapDetails, $info)
+	{
+		$retval='';
+		$row=0;
+		$col=0;
+        
+		$retval.='<table class="inline">';
+		$retval.='<tr class="row'.$row++.'">';
+		foreach($ldapDetails['attributes'] as $key=>$attribute)
+			$retval.='<td class="col'.$col++.' leftalign"><b>'.preg_replace('/(?<!^)[A-Z]/', ' $0', ucfirst($attribute)).'</b></td>';
+		$retval.='</tr>';
+		foreach($info as $key=>$line)
+		{
+			$retval.='<tr class="row'.$row++.'">';
+			$col=0;
+			foreach($ldapDetails['attributes'] as $key=>$attribute)
+				$retval.='<td class="col'.$col++.' leftalign">'.$line[strtolower($attribute)][0].'</td>';
+			$retval.='</tr>';
+		}
+		$retval.='</table>';
+
+		return $retval;
+	}
+
 	function ldapsearch_search($ldapDetails) {
 		//print_r($ldapDetails);
 		if(!$ldapDetails['port']) { $ldapDetails['port'] = 389; }
+		if(!$ldapDetails['filter']) { $ldapDetails['filter'] = '(objectClass=*)'; }
+
 		if($ldap_handle = ldap_connect($ldapDetails['hostname'],$ldapDetails['port'])) {
 			ldap_set_option($ldap_handle, LDAP_OPT_PROTOCOL_VERSION, 3) ;
 			if(ldap_bind($ldap_handle,$ldapDetails['binddn'],$ldapDetails['bindpassword'])) {
 				$value = "";
 				if($ldapDetails['scope'] == 'sub') {
 					$results = ldap_search($ldap_handle,$ldapDetails['basedn'],$ldapDetails['filter'],$ldapDetails['attributes']);
+					ldap_sort($ldap_handle,$results,$ldapDetails['attributes'][0]);
 					$info = ldap_get_entries($ldap_handle, $results);
-					$value = $info[0][strtolower($ldapDetails['attributes'][0])][0];
+					$value = $info['count']==1 ? $info[0][strtolower($ldapDetails['attributes'][0])][0] : $this->getTable($ldapDetails, $info);
 				} elseif($ldapDetails['scope'] == 'one') {
 					$results = ldap_list($ldap_handle, $ldapDetails['basedn'], $ldapDetails['filter'],$ldapDetails['attributes']);
+					ldap_sort($ldap_handle,$results,$ldapDetails['attributes'][0]);
 					$info = ldap_get_entries($ldap_handle, $results);
-					$value = $info[0][strtolower($ldapDetails['attributes'][0])][0];
+					$value = $info['count']==1 ? $info[0][strtolower($ldapDetails['attributes'][0])][0] : $this->getTable($ldapDetails, $info);
 				} elseif($ldapDetails['scope'] == 'base') {
 					$results = ldap_read($ldap_handle, $ldapDetails['basedn'], $ldapDetails['filter'],$ldapDetails['attributes']);
 					$info = ldap_get_entries($ldap_handle, $results);
@@ -153,7 +181,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin {
 
 			switch ($state) {
 				case DOKU_LEXER_SPECIAL : {
-					error_log("render $match\n",3,"/tmp/mylog.txt");
+					//error_log("render $match\n",3,"/tmp/mylog.txt");
 					$content = $this->ldapsearch_search($ldapDetails);
 					$renderer->doc .= $content;
 					break;
