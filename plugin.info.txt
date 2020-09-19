@@ -1,0 +1,7 @@
+base   ldapsearch
+author Felix Haase
+email  felix.haase@feki.de
+date   2020-09-17
+name   ldapsearch plugin
+desc   Display ldap search results in Dokuwiki
+url    https://github.com/Fekide/dokuwiki-plugin-ldapsearch
