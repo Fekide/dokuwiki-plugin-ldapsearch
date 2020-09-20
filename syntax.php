@@ -141,7 +141,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 				$count++;
 			}
 		}
-		dbg(print_r($this->ldapsearch_conf, TRUE));
+		//dbg(print_r($this->ldapsearch_conf, TRUE));
 	}
 
 	function getTable($data, $ldapDetails)

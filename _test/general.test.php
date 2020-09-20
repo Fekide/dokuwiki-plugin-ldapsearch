@@ -10,6 +10,27 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 {
 
 	/**
+	 * Initialize default settings
+	 *
+	 * @return void
+	 */
+	function setUp(){
+		global $conf;
+
+		parent::setUp();
+		$conf['plugin']['ldapsearch']['allow_overrides'] = 1;
+		$conf['plugin']['ldapsearch']['name'] = 'default';
+		$conf['plugin']['ldapsearch']['hostname'] = 'ldap.forumsys.com';
+		$conf['plugin']['ldapsearch']['port'] = '389';
+		$conf['plugin']['ldapsearch']['basedn'] = 'dc=example,dc=com';
+		$conf['plugin']['ldapsearch']['binddn'] = 'cn=read-only-admin,dc=example,dc=com';
+		$conf['plugin']['ldapsearch']['bindpassword'] = 'password';
+		$conf['plugin']['ldapsearch']['attributes'] = 'cn,mail,telephonenumber';
+		$conf['plugin']['ldapsearch']['scope'] = 'sub';
+		$conf['plugin']['ldapsearch']['skipempty'] = '0';
+	}
+
+	/**
 	 * Simple test to make sure the plugin.info.txt is in correct format
 	 */
 	public function test_plugininfo()
@@ -72,5 +93,72 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 				);
 			}
 		}
+	}
+
+	/**
+	 * Test that the ldap connection is working
+	 */
+	public function test_ldapsearch_default()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertStringContainsString("table", $xhtml);
+		$this->assertStringContainsString("Cn", $xhtml);
+		$this->assertStringContainsString("Mail", $xhtml);
+		$this->assertStringContainsString("Telephonenumber", $xhtml);
+		$this->assertStringContainsString("Albert Einstein", $xhtml);
+		$this->assertStringContainsString("einstein@ldap.forumsys.com", $xhtml);
+		$this->assertStringContainsString("314-159-2653", $xhtml);
+		$this->assertStringContainsString("admin", $xhtml);
+		$this->assertStringContainsString("Mathematicians", $xhtml);
+
+	}
+
+
+	/**
+	 * Test that the ldap connection is working
+	 */
+	public function test_ldapsearch_filtered()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertStringContainsString("table", $xhtml);
+		$this->assertStringContainsString("Cn", $xhtml);
+		$this->assertStringContainsString("Mail", $xhtml);
+		$this->assertStringContainsString("Telephonenumber", $xhtml);
+		$this->assertStringContainsString("Albert Einstein", $xhtml);
+		$this->assertStringContainsString("einstein@ldap.forumsys.com", $xhtml);
+		$this->assertStringContainsString("314-159-2653", $xhtml);
+		$this->assertStringContainsString("admin", $xhtml);
+		$this->assertStringNotContainsString("Mathematicians", $xhtml);
+
+	}
+
+		/**
+	 * Test that the ldap connection is working
+	 */
+	public function test_ldapsearch_skipempty()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)" skipempty="1"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertStringContainsString("table", $xhtml);
+		$this->assertStringContainsString("Cn", $xhtml);
+		$this->assertStringContainsString("Mail", $xhtml);
+		$this->assertStringContainsString("Telephonenumber", $xhtml);
+		$this->assertStringContainsString("Albert Einstein", $xhtml);
+		$this->assertStringContainsString("einstein@ldap.forumsys.com", $xhtml);
+		$this->assertStringContainsString("314-159-2653", $xhtml);
+		$this->assertStringNotContainsString("admin", $xhtml);
+		$this->assertStringNotContainsString("Mathematicians", $xhtml);
+
 	}
 }
