@@ -14,3 +14,4 @@ $lang['binddn'] = "Benutzername zur Verbindung mit LDAP-Server";
 $lang['bindpassword'] = "Kennwort zur Verbindung mit LDAP-Server";
 $lang['attributes'] = "Zu liefernde Attribute";
 $lang['scope'] = "LDAP Suchbereich (scope)";
+$lang['skipempty'] = "Sollen Suchergebnisse mit leeren Feldern übersprungen werden";

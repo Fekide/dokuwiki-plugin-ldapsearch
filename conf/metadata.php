@@ -16,3 +16,4 @@ $meta['binddn'] = array('string');
 $meta['bindpassword'] = array('password'); 
 $meta['attributes'] = array('string', '_pattern' => '/^((\w+,)*\w+\|?)*$/'); 
 $meta['scope']   = array('string','_pattern' => '/^((sub|one|base)\|?)*$/');
+$meta['skipempty'] = array('string', '_pattern' => '/^([01]\|?)*$/');

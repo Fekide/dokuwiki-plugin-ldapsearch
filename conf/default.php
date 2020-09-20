@@ -13,3 +13,4 @@ $conf['binddn'] = "";
 $conf['bindpassword'] = "";
 $conf['attributes'] = "";
 $conf['scope'] = "";
+$conf['skipempty'] = "";

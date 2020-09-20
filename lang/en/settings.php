@@ -14,3 +14,4 @@ $lang['binddn'] = "The dn(s) used to connect to your ldap service";
 $lang['bindpassword'] = "The password(s) used to connect to your ldap service";
 $lang['attributes'] = "The return attribute set(s) to be returned";
 $lang['scope'] = "The scope(s) to search";
+$lang['skipempty'] = "Should Search results with empty result be skipped";
