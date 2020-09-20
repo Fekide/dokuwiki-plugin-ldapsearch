@@ -82,7 +82,8 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 							'scope' => $matches[5],
 							'filter' => $matches[6],
 						);
-						$data = $this->ldapsearch_search($ldapDetails);
+						$result = $this->ldapsearch_search($ldapDetails);
+						$data = ['result' => $result, 'ldapDetails', $ldapDetails];
 						return array($state, $data);
 					} elseif (preg_match_all("/$paramSyntax/", $match, $matches, PREG_SET_ORDER)) {
 						$ldapDetails = array();
@@ -91,15 +92,19 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 							$ldapDetails[$pair[1]] = $value;
 						}
 						// return null if no name specified
-						if (!$ldapDetails['search']) {
+						if (!$ldapDetails['search'] || !isset($this->ldapsearch_conf[$ldapDetails['search']])) {
 							return null;
 						}
 						if ($this->getConf('allow_overrides')) {
 							// allow overrides
-							foreach (array('hostname', 'port', 'basedn', 'attributes', 'scope', 'binddn', 'bindpassword') as $key) {
+							foreach (array('hostname', 'port', 'basedn', 'attributes', 'scope', 'binddn', 'bindpassword', 'skipempty') as $key) {
 								if (!$ldapDetails[$key]) {
 									$ldapDetails[$key] = $this->ldapsearch_conf[$ldapDetails['search']][$key];
 								}
+							}
+						} else {
+							foreach (array('hostname', 'port', 'basedn', 'attributes', 'scope', 'binddn', 'bindpassword', 'skipempty') as $key) {
+								$ldapDetails[$key] = $this->ldapsearch_conf[$ldapDetails['search']][$key];
 							}
 						}
 						// explode attributes
@@ -107,15 +112,15 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 							$ldapDetails['attributes'] = explode(',', $ldapDetails['attributes']);
 						}
 						// on its way
-						$data = $this->ldapsearch_search($ldapDetails);
+						$result = $this->ldapsearch_search($ldapDetails);
+						$data = ['result' => $result, 'ldapDetails' => $ldapDetails];
 						return array($state, $data);
 					} else {
 						return null;
 					}
 				}
-
 			default:
-				return array($state);
+				return array($state, null);
 		}
 	}
 
@@ -126,7 +131,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 			$this->ldapsearch_conf[$name] = array();
 			$set_index[] = $name;
 		}
-		foreach (array('hostname', 'port', 'basedn', 'attributes', 'scope', 'binddn', 'bindpassword') as $param) {
+		foreach (array('hostname', 'port', 'basedn', 'attributes', 'scope', 'binddn', 'bindpassword', 'skipempty') as $param) {
 			$count = 0;
 			foreach (explode('|', $this->getConf($param)) as $value) {
 				if ($param == 'attributes') {
@@ -139,7 +144,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 		dbg(print_r($this->ldapsearch_conf, TRUE));
 	}
 
-	function getTable($data)
+	function getTable($data, $ldapDetails)
 	{
 		$table = '';
 		$row = 0;
@@ -148,7 +153,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 		if (isset($data['count']) && $data['count'] > 0) {
 			$table .= '<table class="inline">';
 			$header = '<tr class="row' . $row++ . '">';
-			foreach (array_keys($data[0]) as $attribute) {
+			foreach ($ldapDetails['attributes'] as $attribute) {
 				$header .= '<th class="col' . $col++ . ' leftalign">'
 					. preg_replace('/(?<!^)[A-Z]/', ' $0', ucfirst($attribute))
 					. '</th>';
@@ -156,15 +161,27 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 			$header .= '</tr>';
 			$table .= $header;
 			for ($i = 0; $i < $data['count']; $i++) {
-				# code...
+				$skip_row = FALSE;
 				$row_content = '<tr class="row' . $row++ . '">';
 				$col = 0;
-				foreach ($data[$i] as $key => $values) {
-
-					$row_content .= '<td class="col' . $col++ . ' leftalign">' . implode('<br>', $values) . '</td>';
+				foreach ($ldapDetails['attributes'] as $attribute) {
+					$value = '-';
+					if (!isset($data[$i][$attribute])) {
+						$skip_row = $ldapDetails['skipempty'];
+						if ($skip_row) {
+							break;
+						}
+					} elseif (is_array($data[$i][$attribute])) {
+						$value = implode('<br>', $data[$i][$attribute]);
+					} else {
+						$value = data[$i][$attribute];
+					}
+					$row_content .= '<td class="col' . $col++ . ' leftalign">' . $value . '</td>';
 				}
 				$row_content .= '</tr>';
-				$table .= $row_content;
+				if (!$skip_row) {
+					$table .= $row_content;
+				}
 			}
 			$table .= '</table>';
 		} elseif (is_array($data)) {
@@ -195,7 +212,6 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 
 	function ldapsearch_search($ldapDetails)
 	{
-		dbg(print_r($ldapDetails, TRUE));
 		if (!$ldapDetails['port']) {
 			$ldapDetails['port'] = 389;
 		}
@@ -205,8 +221,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 
 		if ($ldap_handle = ldap_connect($ldapDetails['hostname'], $ldapDetails['port'])) {
 			ldap_set_option($ldap_handle, LDAP_OPT_PROTOCOL_VERSION, 3);
-			if (ldap_bind($ldap_handle, $ldapDetails['binddn'], $ldapDetails['bindpassword'])) {
-				$value = "";
+			if (@ldap_bind($ldap_handle, $ldapDetails['binddn'], $ldapDetails['bindpassword'])) {
 				if ($ldapDetails['scope'] == 'sub') {
 					$results = ldap_search($ldap_handle, $ldapDetails['basedn'], $ldapDetails['filter'], $ldapDetails['attributes']);
 					// ldap_sort($ldap_handle,$results,$ldapDetails['attributes'][0]);
@@ -227,10 +242,10 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 				ldap_unbind($ldap_handle);
 				return $data;
 			} else {
-				return ["error" => "Failed to bind to LDAP on " . $ldapDetails['hostname'] . ":" . $ldapDetails['port'] . "\n"];
+				return ["error" => "Failed to bind to LDAP on " . $ldapDetails['hostname'] . ":" . $ldapDetails['port'] . " using " . $ldapDetails['binddn']];
 			}
 		} else {
-			return ["error" => "Failed to connect to LDAP on " . $ldapDetails['hostname'] . ":" . $ldapDetails['port'] . "\n"];
+			return ["error" => "Failed to connect to LDAP on " . $ldapDetails['hostname'] . ":" . $ldapDetails['port']];
 		}
 	}
 
@@ -239,10 +254,11 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 		for ($i = 0; $i < $data['count']; $i++) {
 			unset($data[$i]['dn']);
 			foreach ($data[$i] as $key => $value) {
-				unset($data[$i]['dn'][$key]['count']);
+				if (isset($data[$i][$key]['count'])) {
+					unset($data[$i][$key]['count']);
+				}
 			}
 		}
-		// unset($data['count']);
 		return $data;
 	}
 
@@ -257,14 +273,12 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 	 */
 	public function render($mode, Doku_Renderer $renderer, $data)
 	{
-		if ($mode !== 'xhtml') {
-
+		if ($mode == 'xhtml') {
 			list($state, $result) = $data;
-
 			switch ($state) {
 				case DOKU_LEXER_SPECIAL: {
-						//error_log("render $match\n",3,"/tmp/mylog.txt");
-						$content = $this->getTable($result);
+						//dbg(print_r($result['result'], TRUE));
+						$content = $this->getTable($result['result'], $result['ldapDetails']);
 						$renderer->doc .= $content;
 						break;
 					}
