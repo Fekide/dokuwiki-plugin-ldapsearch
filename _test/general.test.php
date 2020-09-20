@@ -178,15 +178,15 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 		$instructions = p_get_instructions('{{ldapsearch> search="default"}}');
 		$xhtml = p_render('xhtml', $instructions, $info);
 
-		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("admin", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Mathematicians", $xhtml) !== FALSE);
+		$this->assertTrue(strpos($xhtml, "table") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Cn") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Mail") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Telephonenumber") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Albert Einstein") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "einstein@ldap.forumsys.com") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "314-159-2653") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "admin") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Mathematicians") !== FALSE);
 
 	}
 
@@ -202,15 +202,15 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)"}}');
 		$xhtml = p_render('xhtml', $instructions, $info);
 
-		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("admin", $xhtml) !== FALSE);
-		$this->assertNotTrue(strpos("Mathematicians", $xhtml) !== FALSE);
+		$this->assertTrue(strpos($xhtml, "table") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Cn") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Mail") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Telephonenumber") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Albert Einstein") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "einstein@ldap.forumsys.com") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "314-159-2653") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "admin") !== FALSE);
+		$this->assertNotTrue(strpos($xhtml, "Mathematicians") !== FALSE);
 
 	}
 
@@ -225,15 +225,15 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)" skipempty="1"}}');
 		$xhtml = p_render('xhtml', $instructions, $info);
 
-		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
-		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
-		$this->assertNotTrue(strpos("admin", $xhtml) !== FALSE);
-		$this->assertNotTrue(strpos("Mathematicians", $xhtml) !== FALSE);
+		$this->assertTrue(strpos($xhtml, "table") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Cn") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Mail") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Telephonenumber") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "Albert Einstein") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "einstein@ldap.forumsys.com") !== FALSE);
+		$this->assertTrue(strpos($xhtml, "314-159-2653") !== FALSE);
+		$this->assertNotTrue(strpos($xhtml, "admin") !== FALSE);
+		$this->assertNotTrue(strpos($xhtml, "Mathematicians") !== FALSE);
 
 	}
 }
