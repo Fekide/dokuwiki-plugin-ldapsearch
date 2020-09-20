@@ -99,6 +99,7 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 
 	/**
 	 * Test that the ldap connection is working
+	 * @requires PHPUnit >= 7
 	 */
 	public function test_ldapsearch_default()
 	{
@@ -122,6 +123,7 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 
 	/**
 	 * Test that the ldap connection is working
+	 * @requires PHPUnit >= 7
 	 */
 	public function test_ldapsearch_filtered()
 	{
@@ -144,6 +146,7 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 
 		/**
 	 * Test that the ldap connection is working
+	 * @requires PHPUnit >= 7
 	 */
 	public function test_ldapsearch_skipempty()
 	{
@@ -161,6 +164,76 @@ class general_plugin_ldapsearch_test extends DokuWikiTest
 		$this->assertStringContainsString("314-159-2653", $xhtml);
 		$this->assertStringNotContainsString("admin", $xhtml);
 		$this->assertStringNotContainsString("Mathematicians", $xhtml);
+
+	}
+
+	/**
+	 * Test that the ldap connection is working
+	 * @requires PHPUnit < 7
+	 */
+	public function test_ldapsearch_default_old()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("admin", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Mathematicians", $xhtml) !== FALSE);
+
+	}
+
+
+	/**
+	 * Test that the ldap connection is working
+	 * @requires PHPUnit < 7
+	 */
+	public function test_ldapsearch_filtered_old()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("admin", $xhtml) !== FALSE);
+		$this->assertNotTrue(strpos("Mathematicians", $xhtml) !== FALSE);
+
+	}
+
+		/**
+	 * Test that the ldap connection is working
+	 * @requires PHPUnit < 7
+	 */
+	public function test_ldapsearch_skipempty_old()
+	{
+		$info = array();
+
+		$instructions = p_get_instructions('{{ldapsearch> search="default" filter="(objectClass=person)" skipempty="1"}}');
+		$xhtml = p_render('xhtml', $instructions, $info);
+
+		$this->assertTrue(strpos("table", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Cn", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Mail", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Telephonenumber", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("Albert Einstein", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("einstein@ldap.forumsys.com", $xhtml) !== FALSE);
+		$this->assertTrue(strpos("314-159-2653", $xhtml) !== FALSE);
+		$this->assertNotTrue(strpos("admin", $xhtml) !== FALSE);
+		$this->assertNotTrue(strpos("Mathematicians", $xhtml) !== FALSE);
 
 	}
 }
