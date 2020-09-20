@@ -9,6 +9,8 @@
 class general_plugin_ldapsearch_test extends DokuWikiTest
 {
 
+	protected $pluginsEnabled = array( 'ldapsearch' );
+
 	/**
 	 * Initialize default settings
 	 *
