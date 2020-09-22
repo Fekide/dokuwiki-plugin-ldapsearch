@@ -78,7 +78,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 							'hostname' => $matches[1],
 							'port' => $matches[2],
 							'basedn' => $matches[3],
-							'attributes' => explode(",", $matches[4]),
+							'attributes' => explode(",", mb_convert_case($matches[4], MB_CASE_LOWER)),
 							'scope' => $matches[5],
 							'filter' => $matches[6],
 						);
@@ -88,7 +88,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 					} elseif (preg_match_all("/$paramSyntax/", $match, $matches, PREG_SET_ORDER)) {
 						$ldapDetails = array();
 						foreach ($matches as $pair) {
-							$value = preg_replace('/^"(.*?)"$/', '$1', $pair[2]);
+							$value = trim($pair[2], "\"");
 							$ldapDetails[$pair[1]] = $value;
 						}
 						// return null if no name specified
@@ -109,7 +109,7 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 						}
 						// explode attributes
 						if (is_string($ldapDetails['attributes'])) {
-							$ldapDetails['attributes'] = explode(',', $ldapDetails['attributes']);
+							$ldapDetails['attributes'] = explode(',', mb_convert_case($ldapDetails['attributes'], MB_CASE_LOWER));
 						}
 						// on its way
 						$result = $this->ldapsearch_search($ldapDetails);
@@ -135,6 +135,8 @@ class syntax_plugin_ldapsearch extends DokuWiki_Syntax_Plugin
 			$count = 0;
 			foreach (explode('|', $this->getConf($param)) as $value) {
 				if ($param == 'attributes') {
+					//Convert to lowercase since ldap returns all attributes in lower case
+					$value = mb_convert_case($value, MB_CASE_LOWER);
 					$value = explode(',', $value);
 				}
 				$this->ldapsearch_conf[$set_index[$count]][$param] = $value;
