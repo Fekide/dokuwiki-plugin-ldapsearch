@@ -2,7 +2,7 @@
 /**
  * Default settings for the ldapsearch plugin
  *
- * @author Felix Haase <felix.haase@feki.de>
+ * @author Darren Hemphill <contact [alt] rendezz [dlot] co [dlot] za>
  */
 $conf['allow_overrides'] = 0;
 $conf['name'] = "";

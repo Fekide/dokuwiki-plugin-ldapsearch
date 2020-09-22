@@ -2,7 +2,7 @@
 /**
  * Options for the ldapsearch plugin
  *
- * @author Felix Haase <felix.haase@feki.de>
+ * @author Darren Hemphill <contact [alt] rendezz [dlot] co [dlot] za>
  */
 
 $meta['allow_overrides'] = array('onoff');
